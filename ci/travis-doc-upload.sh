@@ -51,7 +51,7 @@ mv ../target/$TARGET/doc "$PROJECT_NAME"
 # For each element of $PROJECT_NAME generate an index
 # this _must_ be the crate we care about, used to suffix last indexing
 # cursor for iteration
-crate_name="$(printf "%s" "$PROJECT_NAME" | sed 's/-/_/g')"
+crate_name="$(printf "%s" "$PROJECT_BASE" | sed 's/-/_/g')"
 
 gen_commit () {
 	curr="$(dirname "$PROJECT_NAME")"

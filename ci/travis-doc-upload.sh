@@ -53,7 +53,7 @@ mv ../target/$TARGET/doc "$PROJECT_NAME"
 # cursor for iteration
 crate_name="$(printf "%s" "$PROJECT_NAME" | sed 's/-/_/g')"
 curr="$(dirname "$PROJECT_NAME")"
-../"$D"/generate-index.sh "$curr" "$PROJECT_BASE/index.html"
+../"$D"/generate-index.sh "$curr" "$crate_name/index.html"
 if ! [ . = "$curr" ]; then
 	curr="$(dirname "$curr")"
 	while true; do

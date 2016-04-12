@@ -21,13 +21,14 @@ unsafe fn dup(i: RawFd) -> io::Result<RawFd> {
 }
 
 /**
- * OwnedFd is an RAII wrapper around RawFd: it automatically closes on drop & provides borrow()
- * functionality to support lifetimes & borrow checking around the use of file descriptors
+ * `OwnedFd` is an RAII wrapper around `RawFd`: it automatically closes on `Drop` & provides
+ * `Borrow::borrow()` functionality to support lifetimes & borrow checking around the use of file
+ * descriptors
  *
- * Compared to using File, TcpStream, etc as a wrapper to close on drop, OwnedFd:
+ * Compared to using `File`, `TcpStream`, etc as a wrapper to close on drop, `OwnedFd`:
  *
  *  - allows any type of filedescriptor to be used safely
- *  - has no overhead greater than a RawFd (no buffer, metadata, or other allocations)
+ *  - has no overhead greater than a `RawFd` (no buffer, metadata, or other allocations)
  *  - allows use of the borrow system to ensure drop (close) happens only when all users of an
  *    ownedfd have released it.
  */
@@ -38,33 +39,33 @@ pub struct OwnedFd {
 impl OwnedFd {
     /**
      * Given a raw file descriptor that may be owned by another (ie: another data structure might
-     * close it), create a Owned version that we have control over (via dup())
+     * close it), create an owned version that we have control over (via `OwnedF::dup()`)
      *
      * For taking ownership, see `FromRawFd::from_raw_fd()`.
      *
      * Unsafety:
      *
-     *  - @i _must_ be a valid file descriptor (of any kind)
+     *  - `i` _must_ be a valid file descriptor (of any kind)
      */
     pub unsafe fn from_unowned_raw(i : RawFd) -> io::Result<OwnedFd> {
         Ok(OwnedFd { inner: try!(dup(i)) })
     }
 
     /**
-     * Duplicate this OwnedFd, and allow the error to be detected.
+     * Duplicate this `OwnedFd`, and allow the error to be detected.
      *
-     * Clone uses this, but panics on error
+     * `Clone::clone()` uses this, but panics on error
      */
     pub fn dup(&self) -> io::Result<OwnedFd> {
         unsafe { OwnedFd::from_unowned_raw(self.as_raw_fd()) }
     }
 
     /**
-     * Given a type that impliments `IntoRawFd` construct an OwnedFd.
+     * Given a type that impliments `IntoRawFd` construct an `OwnedFd`.
      *
      * This is safe because we assume the promises of `IntoRawFd` are followed.
      *
-     * NOTE: ideally, we'd impl this as From<T>, but current rust doesn't allow that. Revisit when
+     * NOTE: ideally, we'd impl this as `From<T>`, but current rust doesn't allow that. Revisit when
      * specialization stabilizes.
      */
     pub fn from<T: IntoRawFd>(i: T) -> Self {
@@ -123,11 +124,11 @@ impl Deref for OwnedFd {
 }
 
 /**
- * A zero-cost (well, very, very, low cost) borrow of an OwnedFd.
+ * A zero-cost (well, very, very, low cost) borrow of an `OwnedFd`.
  *
  * This cannot be constructed directly, and can only exist as `&FdRef`.
  *
- * As a result, it might be slightly larger than a bare RawFd.
+ * As a result, it might be slightly larger than a bare `RawFd`.
  */
 pub struct FdRef {
     #[doc(hidden)]
@@ -136,12 +137,12 @@ pub struct FdRef {
 
 impl FdRef {
     /**
-     * Construct a FdRef reference from a RawFd. No ownership is taken.
+     * Construct a `FdRef` reference from a `RawFd`. No ownership is taken.
      *
      * unsafety:
      *
-     *  - @i _must_ be a valid fd
-     *  - the lifetime 'a must be appropriately bound
+     *  - `i` _must_ be a valid file descriptor
+     *  - the lifetime `'a` must be appropriately bound to `i`'s lifetime
      */
     pub unsafe fn from_unowned_raw<'a>(i: RawFd) -> &'a FdRef{
         transmute(i as isize)

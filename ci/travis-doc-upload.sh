@@ -52,22 +52,47 @@ mv ../target/$TARGET/doc "$PROJECT_NAME"
 # this _must_ be the crate we care about, used to suffix last indexing
 # cursor for iteration
 crate_name="$(printf "%s" "$PROJECT_NAME" | sed 's/-/_/g')"
-curr="$(dirname "$PROJECT_NAME")"
-../"$D"/generate-index.sh "$curr" "$crate_name/index.html"
-if ! [ . = "$curr" ]; then
-	curr="$(dirname "$curr")"
-	while true; do
-		../"$D"/generate-index.sh "$curr"
-		if [ . = "$curr" ]; then
-			break
-		fi
-		curr="$(dirname "$curr")"
-	done
-fi
 
-git add -A .
-git commit -qm "doc upload for $PROJECT_NAME ($TRAVIS_REPO_SLUG)"
+gen_commit () {
+	curr="$(dirname "$PROJECT_NAME")"
+	../"$D"/generate-index.sh "$curr" "$crate_name/index.html"
+	if ! [ . = "$curr" ]; then
+		curr="$(dirname "$curr")"
+		while true; do
+			../"$D"/generate-index.sh "$curr"
+			if [ . = "$curr" ]; then
+				break
+			fi
+			curr="$(dirname "$curr")"
+		done
+	fi
+
+	git add -A .
+	git commit -qm "doc upload for $PROJECT_NAME ($TRAVIS_REPO_SLUG)"
+}
+
+rollback_commit() {
+	git reset HEAD^
+	# moves HEAD & index, but not workdir
+
+	curr="$(dirname "$PROJECT_NAME")"
+	git checkout index.html
+	if ! [ . = "$curr" ]; then
+		curr="$(dirname "$curr")"
+		while true; do
+			git checkout index.html
+			if [ . = "$curr" ]; then
+				break
+			fi
+			curr="$(dirname "$curr")"
+		done
+	fi
+}
+
+gen_commit
 
 while ! git push -q origin HEAD:refs/heads/gh-pages; do
-	git pull --rebase
+	rollback_commit
+	git pull
+	gen_commit
 done

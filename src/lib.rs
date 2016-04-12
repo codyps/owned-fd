@@ -1,5 +1,8 @@
 //! Provide a general handler for file descriptor reasources via the `OwnedFd` and `FdRef` types
 
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
+
 use std::os::unix::io::{IntoRawFd,AsRawFd,FromRawFd,RawFd};
 use std::mem::{forget, transmute};
 use std::io;

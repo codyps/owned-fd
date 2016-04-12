@@ -14,3 +14,7 @@ tempfile = "2.*"
 
 [dependencies]
 libc = "0.*"
+clippy = {version = "*", optional = true}
+
+[features]
+default = []

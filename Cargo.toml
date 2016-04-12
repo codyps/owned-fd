@@ -1,0 +1,16 @@
+[package]
+name = "owned-fd"
+version = "0.1.0"
+authors = ["Cody P Schafer <dev@codyps.com>"]
+include = ["Cargo.toml", "src/*.rs"]
+license = "MIT OR Apache-2.0"
+description = "Ownership and lifetimes for file descriptors"
+keywords = ["RawFd", "lifetime", "own", "file descriptor"]
+repository = "https://github.com/jmesmon/owned-fd"
+documentation = "http://codyps.com/docs/owned-fd/x86_64-unknown-linux-gnu/stable/owned-fd"
+
+[dev-dependencies]
+tempfile = "2.*"
+
+[dependencies]
+libc = "*"
